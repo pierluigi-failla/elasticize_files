@@ -1,19 +1,30 @@
-===============
-elasticizefiles
-===============
+================
+Elasticize Files
+================
 
 
-Add a short description here!
+Crawl, process and index your files the way you like, applying in top of them the functions you like. Fast, in parellel.
 
 
 Description
 ===========
 
-A longer description of your project goes here...
+Take a look to the `samples` folder I'll try to do my best to enrich the documentation in the future (feel to help if you want!!).
 
+The idea is simple:
 
-Note
-====
+1) you can define file matching rules as easy as write a regex;
+2) on the matching file will applied whatever function you like (abstract from Extractor);
+3) store the results in an Elastic index.
 
-This project has been set up using PyScaffold 3.2.3. For details and usage
-information on PyScaffold see https://pyscaffold.org/.
+Example 1: let's say you want to scan the disk just for jpeg files, extract for each the exif and store it in Elastic.
+
+Example 2: you want to scan all `.exe` or `.dll` files, extract PE header for each of them and store it.
+
+Example 3: you have several distributed machines and you want to centralize information about files in a single location
+
+ToDos
+=====
+
+- Add APScheduler in order to make allow programmable rescan
+- Improve (write) documentation
