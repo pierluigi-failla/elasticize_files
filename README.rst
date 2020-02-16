@@ -3,7 +3,7 @@ Elasticize Files
 ================
 
 
-Crawl, process and index your files the way you like, applying in top of them the functions you like. Fast, in parellel.
+Crawl, process and index your files the way you like, applying in top of them the functions you like, storing the results in Elastic. Fast, in parellel.
 
 
 Description
