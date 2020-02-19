@@ -26,3 +26,8 @@ class ExtractExif(Extractor):
         except Exception as e:
             logging.warning(f'exception extracting metadata from {filename}. {e}')
         return metadata
+
+    def mapping(self):
+        """ Mapping in this case can be really different by the file type
+        so I will leave to Elastic. """
+        return None

@@ -33,7 +33,8 @@ def main():
                      rules=rules,
                      elastic_hosts=['localhost:9200', ],
                      elastic_index='fileindex',
-                     elastic_doc_type='file').crawl_and_process()
+                     elastic_doc_type='file',
+                     index_drop_if_exists=True,).crawl_and_process()
 
 
 if __name__ == '__main__':

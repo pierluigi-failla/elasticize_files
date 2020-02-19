@@ -17,4 +17,18 @@ class Extractor(metaclass=ABCMeta):
 
     @abstractmethod
     def extract(self, filename):
+        """ This will implement the actual extractor
+
+        :param filename: is the filename (path+filename) to be processed
+        :returns: a dictionary with the output of the extraction
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def mapping(self):
+        """ This should return the Elastic type mapping related to result
+        produced by extract
+
+        :returns: a dictionary for the Elastic type mapping
+        """
         raise NotImplementedError()

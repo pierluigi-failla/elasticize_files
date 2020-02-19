@@ -15,6 +15,18 @@ class ExtractFilename(Extractor):
     def extract(self, filename):
         return {'filename': filename}
 
+    def mapping(self):
+        return {
+            'filename': {
+                'type': 'text',
+                'fields': {
+                    'keywords': {
+                        'type': 'keyword',
+                    }
+                }
+            }
+        }
+
 
 class ExtractSha256(Extractor):
 
@@ -23,6 +35,13 @@ class ExtractSha256(Extractor):
 
     def extract(self, filename):
         return {'sha256': get_hash(filename, hash_type='sha256')}
+
+    def mapping(self):
+        return {
+            'sha256': {
+                'type': 'text',
+            }
+        }
 
 
 class ExtractPythonFunction(Extractor):
@@ -40,7 +59,8 @@ class ExtractPythonFunction(Extractor):
             c = 0
             for line in f.readlines():
                 c += 1
-                line = line.replace('\r', '').replace('\n', '').replace('\t', ' ').strip()
+                line = line.replace('\r', '').replace('\n', '').replace('\t',
+                                                                        ' ').strip()
                 if line.startswith('class'):
                     r['class'].append({'line': c, 'name': line})
                     continue
@@ -48,3 +68,29 @@ class ExtractPythonFunction(Extractor):
                     r['function'].append({'line': c, 'name': line})
                     continue
         return r
+
+    def mapping(self):
+        return {
+            'class': {
+                'properties': {
+                    'line': {'type': 'long', },
+                    'name': {
+                        'type': 'text',
+                        'fields': {
+                            'keywords': {'type': 'keyword', }
+                        }
+                    }
+                }
+            },
+            'function': {
+                'properties': {
+                    'line': {'type': 'long', },
+                    'name': {
+                        'type': 'text',
+                        'fields': {
+                            'keywords': {'type': 'keyword', }
+                        }
+                    }
+                }
+            },
+        }

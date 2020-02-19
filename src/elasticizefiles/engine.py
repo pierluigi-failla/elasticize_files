@@ -22,17 +22,45 @@ from elasticizefiles.utils.files import get_machine_info
 
 
 class ElasticizeEngine(object):
+    """ The main engine to scan, process and store files
 
-    def __init__(self, path, rules, elastic_hosts, elastic_index, elastic_doc_type):
+    :param path: the path to be scanned
+    :param rules: the rules to be applied
+    :param elastic_hosts: list of nodes ['{host}:{port}', ...]
+    :param elastic_index: an index name
+    :param elastic_doc_type: the elastic doc_type name
+    :param index_create_if_not_exists: if True create the index if not exists
+    :param index_drop_if_exists: if True drop the existing index
+    :param index_config: additional config params to create the index
+    :param index_mapping: the data type mapping for the current index
+    :param index_alias_name: an alias name for this index
+    """
+
+    def __init__(self, path, rules, elastic_hosts, elastic_index, elastic_doc_type,
+                 index_create_if_not_exists=True, index_drop_if_exists=False,
+                 index_config=None, index_mapping=None, index_alias_name=None):
+
         self._path = path
         ElasticizeEngine._check_rules(rules)
         self._rules = rules
         self._machine_info = get_machine_info()
 
+        if index_mapping is None:
+            index_mapping = ElasticizeEngine._build_mapping(rules)
+
         self._es = Elastic(elastic_hosts, elastic_index, elastic_doc_type)
-        self._es.create_index(elastic_index, elastic_doc_type)
+        self._es.create_index(elastic_index, elastic_doc_type,
+                              create_if_not_exists=index_create_if_not_exists,
+                              drop_if_exists=index_drop_if_exists,
+                              config=index_config, mapping=index_mapping,
+                              alias_name=index_alias_name)
 
     def crawl_and_process(self, n_jobs=-1):
+        """ Crawl files and apply extractor on them.
+
+        :param n_jobs: number of parallel job, if -1 will be automatically set
+                       to the number of cpus available
+        """
         if n_jobs < 1:
             n_jobs = cpu_count()
         tot = 0
@@ -66,9 +94,11 @@ class ElasticizeEngine(object):
         logging.info(f'processing: {filename}')
         sha = get_hash(filename, hash_type='sha256')
         file_id = sha256((self._machine_info['mac_address'] + sha + filename).encode()).hexdigest()
+        now = datetime.now()
         r = {
             'file_id': file_id,
-            'scan_timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f'),
+            'scan_datetime': now.strftime('%Y-%m-%d %H:%M:%S'),
+            'scan_timestamp': now.timestamp() * 1000,
             'sha256': sha,
             'filename': filename,
             'file_stats': filestat(filename),
@@ -104,3 +134,57 @@ class ElasticizeEngine(object):
                         raise Exception(f'{type(obj)} seems not to be an Extractor')
         for k, v in c.items():
             logging.info(f'checked: {v} {k}')
+
+    @staticmethod
+    def _build_mapping(rules):
+        mapping = {
+            'file_id': {'type': 'text', },
+            'scan_datetime': {
+                'type': 'date',
+                'format': 'yyyy-MM-dd HH:mm:ss',
+            },
+            'scan_timestamp': {'type': 'float'},
+            'sha256': {'type': 'text', },
+            'filename': {
+                'type': 'text',
+                'fields': {
+                    'keywords': {
+                        'type': 'keyword',
+                    }
+                }
+            },
+            'file_stats': {
+                'properties': {
+                    'st_atime': {'type': 'float'},
+                    'st_atime_ns': {'type': 'long'},
+                    'st_ctime': {'type': 'float'},
+                    'st_ctime_ns': {'type': 'long'},
+                    'st_dev': {'type': 'long'},
+                    'st_file_attributes': {'type': 'long'},
+                    'st_gid': {'type': 'long'},
+                    'st_ino': {'type': 'long'},
+                    'st_mode': {'type': 'long'},
+                    'st_mtime': {'type': 'float'},
+                    'st_mtime_ns': {'type': 'long'},
+                    'st_nlink': {'type': 'long'},
+                    'st_size': {'type': 'long'},
+                    'st_uid': {'type': 'long'},
+                },
+            },
+            'machine_info': {
+                'properties': {
+                    'platform': {'type': 'text'},
+                    'hostname': {'type': 'text'},
+                    'ip_address': {'type': 'text'},
+                    'mac_address': {'type': 'text'},
+                }
+            },
+        }
+        for rule_name, rule in rules.items():
+            for _ in rule['pattern']:
+                for extractor in rule['extractor']:
+                    for n, e in extractor.items():
+                        _map = e.mapping()
+                        if _map:
+                            mapping[f'{rule_name}.{n}'] = {'properties': _map}
+        return {'properties': mapping}

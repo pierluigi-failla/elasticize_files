@@ -12,7 +12,7 @@ from elasticsearch.connection import RequestsHttpConnection
 
 
 class Elastic(object):
-    """ A singleton to talk with ElasticSearch
+    """ A wrapper to ElasticSearch
 
     OR is spelled should
     AND is spelled must
@@ -29,10 +29,24 @@ class Elastic(object):
         self._doc_type = doc_type
 
     def create_index(self, index_name, doc_type, create_if_not_exists=True,
-                     config=None, mapping=None, alias_name=None):
+                     drop_if_exists=False, config=None, mapping=None,
+                     alias_name=None):
+        """ Simplified index creation
+
+        :param index_name: an index name
+        :param doc_type: the elastic doc_type name
+        :param create_if_not_exists: if True create the index if not exists
+        :param drop_if_exists: if True drop the existing index
+        :param config: additional config params to create the index
+        :param mapping: the data type mapping for the current index
+        :param alias_name: an alias name for this index
+        """
         es = Elasticsearch(hosts=self._hosts, http_compress=True,
                            connection_class=RequestsHttpConnection,
                            timeout=30)
+        if drop_if_exists:
+            es.indices.delete(index=index_name)
+            logging.debug(f'index: {index_name} dropped')
         if es.indices.exists(index_name):
             logging.debug(f'index: {index_name} exists')
         else:
@@ -42,7 +56,8 @@ class Elastic(object):
                 if mapping is not None:
                     es.indices.put_mapping(index=index_name,
                                            doc_type=doc_type,
-                                           body=mapping, )
+                                           body=mapping,
+                                           include_type_name=True, )
                 if alias_name is not None:
                     es.indices.put_alias(index=index_name, name=alias_name)
         self._index = index_name

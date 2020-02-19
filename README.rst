@@ -1,3 +1,5 @@
+![Python package](https://github.com/pierluigi-failla/elasticize_files/workflows/Python%20package/badge.svg)
+
 ================
 Elasticize Files
 ================
@@ -9,7 +11,7 @@ Crawl, process and index your files the way you like, applying in top of them th
 Description
 ===========
 
-Take a look to the `samples` folder I'll try to do my best to enrich the documentation in the future (feel to help if you want!!).
+Take a look to the [samples](src/samples) folder I'll try to do my best to enrich the documentation in the future (feel to help if you want!!).
 
 The idea is simple:
 
@@ -26,5 +28,6 @@ Example 3: you have several distributed machines and you want to centralize info
 ToDos
 =====
 
+- Add GitHub Action to properly automatically publish the package on PyPi
 - Add APScheduler in order to make allow programmable rescan
 - Improve (write) documentation
