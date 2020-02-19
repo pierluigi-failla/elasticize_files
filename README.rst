@@ -1,5 +1,3 @@
-![Python package](https://github.com/pierluigi-failla/elasticize_files/workflows/Python%20package/badge.svg)
-
 ================
 Elasticize Files
 ================
@@ -11,7 +9,7 @@ Crawl, process and index your files the way you like, applying in top of them th
 Description
 ===========
 
-Take a look to the [samples](src/samples) folder I'll try to do my best to enrich the documentation in the future (feel to help if you want!!).
+Take a look to the `samples <src/samples>`_ folder I'll try to do my best to enrich the documentation in the future (feel to help if you want!!).
 
 The idea is simple:
 
