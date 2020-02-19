@@ -15,7 +15,7 @@ jobs:
         python-version: '3.x'
     - name: Install dependencies
       run: |
-        python stupe.py install
+        python setup.py install
     - name: Build wheels
       run: |
         python setup.py bdist_wheel
