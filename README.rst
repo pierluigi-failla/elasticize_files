@@ -23,6 +23,8 @@ Example 2: you want to scan all `.exe` or `.dll` files, extract PE header for ea
 
 Example 3: you have several distributed machines and you want to centralize information about files in a single location
 
+Take a look here `extractors <src/extractors/README.rst>`_ for further details on extractors.
+
 ToDos
 =====
 
